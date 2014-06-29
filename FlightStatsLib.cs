@@ -1,5 +1,7 @@
 ﻿#region
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using bscheiman.Common.Extensions;
@@ -24,22 +26,26 @@ namespace FlightStats {
             AppKey = appKey;
         }
 
-        public FidsResponse GetArrivalsForAirport(string airport) {
+        public AirlineInfo GetAirlineInfo(string airline) {
+            return Get(string.Format("airlines/rest/v1/json/icao/{0}", airline)).FromJson<AirlineResponse>().Airlines.First();
+        }
+
+        public IList<FidsData> GetArrivalsForAirport(string airport) {
             return Get(string.Format("fids/rest/v1/json/{0}/arrivals", airport), new {
                 requestedFields = "airlineCode,flightNumber,city,currentTime,gate,remarks",
                 sortFields = "currentTime",
                 excludeCargoOnlyFlights = true,
                 lateMinutes = 15,
-            }).FromJson<FidsResponse>();
+            }).FromJson<FidsResponse>().FidsData;
         }
 
-        public FidsResponse GetDeparturesForAirport(string airport) {
+        public IList<FidsData> GetDeparturesForAirport(string airport) {
             return Get(string.Format("fids/rest/v1/json/{0}/departures", airport), new {
                 requestedFields = "airlineCode,flightNumber,city,currentTime,gate,remarks",
                 sortFields = "currentTime",
                 excludeCargoOnlyFlights = true,
                 lateMinutes = 15,
-            }).FromJson<FidsResponse>();
+            }).FromJson<FidsResponse>().FidsData;
         }
 
         #region Helpers
@@ -48,8 +54,6 @@ namespace FlightStats {
         }
 
         internal string Get(string endpoint, object obj = null) {
-            Console.WriteLine(obj.ToQueryString());
-
             return GetClient().GetStringAsync(GetEndpoint(endpoint, obj)).Result;
         }
 
@@ -62,6 +66,8 @@ namespace FlightStats {
         }
 
         internal Uri GetEndpoint(string endpoint, object obj = null) {
+            obj = obj ?? new object();
+
             return new Uri(string.Format("https://api.flightstats.com/flex/{0}?{1}", endpoint, obj.ToQueryString(readAndWrite: false)));
         }
 

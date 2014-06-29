@@ -41,6 +41,8 @@
     <Reference Include="System.ServiceModel" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Objects\AirlineInfo.cs" />
+    <Compile Include="Objects\AirlineResponse.cs" />
     <Compile Include="Objects\FidsData.cs" />
     <Compile Include="Objects\FidsResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
